@@ -28,14 +28,16 @@ overflow equ 3 ; Zählerüberlauf RA3
 
  org 0 ; Programm beginnt bei Adresse 0
  
-cold ; Kaltstart
+cold
  bsf status,rp0 ; auf Bank 1 umschlaten
  clrf trisb ; Port B alles Ausgang
  bcf trisa,overflow ; overflow auf Ausgang setzen
+
  bcf status,rp0 ; zurück auf Bank 0
  movf porta,w ; Takteingang lesen
  andlw maske ; nur Takt 
  movewf alterWert ; erster Vergleichswert
+ 
 resetCNT
  clrf counter ; Counter auf Null setzen
  bcf porta,overflow ; overflow zurücksetzen

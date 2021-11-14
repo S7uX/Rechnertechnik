@@ -7,8 +7,7 @@ rp0	equ 5
 counter equ 10h
  org 0
  
-cold
- 
+cold ; Kaltstart
  movlw 10h
  movwf counter
  goto cold
