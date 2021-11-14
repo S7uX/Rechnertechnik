@@ -1,8 +1,0 @@
-Aufgabe 1
-
-Es soll ein einfacher Binärzähler programmiert werden. 
-Dieser besitzt 8 Ausgänge (Port RB bzw. PORT 1) und einen Zähleingang RA0.
-Ein Reset-Eingang (RA1) setzt den Zählerstand auf 0,
-ein Inhibit-Eingang (RA2) verriegelt den Zählereingang bei H-Pegel und gibt ihn bei Lowpegel wieder frei.
-Der Pin RA3 ist der Carryausgang des Zählers.
-Er ist für die Dauer eines Taktes aktiv hat also H-Pegel beim Zählerübergang von 0FFH auf 00H.

@@ -1,14 +1,26 @@
 ; Binärzähler
 
  device 16f84
- 
-status equ 3 ; Adresse des Statusregisters im RAM-File
-rp0 equ 5 
-carry equ 0
-zero equ 2
 
+; \***************** Symbol Names **********************\
+ 
+; Statusregister
+status equ 3 ; Adresse des Statusregisters im RAM-File
+rp0 equ 5 ; Bank select
+carry equ 0 ; carry flag - Zeigt an, ob bei der letzten Rechenoperation ein Übertrag auftrat.
+zero equ 2 ; zero flag - Zeigt an, ob das Ergebnis einer Operation gleich 0 war.
+
+; PORTA
 porta equ 5
+; Bitstellen von Port A 
+takt equ 0 ; Zähleingang RA0
+reset equ 1 ; Reseteingang RA1
+inhibit equ 2 ; Inhitbiteingang RA2 
+carry equ 3 ; Carryausgang RA3 
+maske equ 1 ; 00000001 ; Maske für Zähleingang RA0
+
 portb equ 6
+; TRIS: TRI-State. Mit einem TRIS Register kann Portpins auf Eingang oder Ausgang schalten. 
 trisa equ 5
 trisb equ 6
 
@@ -18,29 +30,26 @@ aktWert equ 11h
 alterWert equ 12h 
 flanke equ 13h
 
-maske equ 1 ; 00000001
-
-; Bitstellen von Port A 
-takt equ 0 ; Takteingang RA0
-reset equ 1 ; Reseteingang RA1
-inhibit equ 2 ; Inhitbiteingang RA2 
-overflow equ 3 ; Zählerüberlauf RA3 
+; \***************** Symbol Names **********************\
 
  org 0 ; Programm beginnt bei Adresse 0
  
 cold
+; Ports initalisieren
  bsf status,rp0 ; auf Bank 1 umschlaten
+ bcf trisa,carry ; Port A carry auf Ausgang setzen
  clrf trisb ; Port B alles Ausgang
- bcf trisa,overflow ; overflow auf Ausgang setzen
 
  bcf status,rp0 ; zurück auf Bank 0
- movf porta,w ; Takteingang lesen
- andlw maske ; nur Takt 
- movewf alterWert ; erster Vergleichswert
+
+; ersten Wert lesen
+ movf porta,w ; Port A ins W-file lesen
+ andlw maske ; RA0 Zähleingang maskieren
+ movewf alterWert ; W-file in alterWert Schreiben: Erster Vergleichswert
  
 resetCNT
- clrf counter ; Counter auf Null setzen
- bcf porta,overflow ; overflow zurücksetzen
+ clrf counter ; Counter mit 0 initalisieren
+ bcf porta,carry ; carry zurücksetzen
 
 xxxx
  movf counter,w
@@ -48,11 +57,13 @@ xxxx
  
 mainloop
  btfsc porta,reset ; Resteingang 1? 
- goto resetCNT ; ja
+ goto resetCNT ; ja --> reset
 
- btfsc porta,inhibit ; Zähler anhalten 1? 
- goto mainloop ; ja
- call checkEdge ; Flanke da?
- iorlw 0 ;
- btfsc status,zero
+ btfsc porta,inhibit ; Inhibit-Eingang 1? 
+ goto mainloop ; ja --> Zähler anhalten
+ call checkEdge ; Flanke da? Nein --> W = 0, 
+ iorlw 0 ; Inklusives oder mit x: 
+ btfsc status,zero ; Prüfe ob iorlw 0 ergeben hat
  goto mainloop ; nein
+
+checkEdge
