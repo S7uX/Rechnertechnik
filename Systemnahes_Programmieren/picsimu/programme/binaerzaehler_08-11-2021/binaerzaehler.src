@@ -1,0 +1,56 @@
+; Binärzähler
+
+ device 16f84
+ 
+status equ 3 ; Adresse des Statusregisters im RAM-File
+rp0 equ 5 
+carry equ 0
+zero equ 2
+
+porta equ 5
+portb equ 6
+trisa equ 5
+trisb equ 6
+
+; Variablen - Speichersetellen
+counter equ 10h ; 0c erste freie Adresse, 10h ist im Simulator leicht zu finden
+aktWert equ 11h
+alterWert equ 12h 
+flanke equ 13h
+
+maske equ 1 ; 00000001
+
+; Bitstellen von Port A 
+takt equ 0 ; Takteingang RA0
+reset equ 1 ; Reseteingang RA1
+inhibit equ 2 ; Inhitbiteingang RA2 
+overflow equ 3 ; Zählerüberlauf RA3 
+
+ org 0; Programm beginnt bei Adresse 0
+ 
+cold
+ bsf status,rp0 ; auf Bank 1 umschlaten
+ clrf trisb ; Port B alles Ausgang
+ bcf trisa,overflow ; overflow auf Ausgang setzen
+ bcf status,rp0 ; zurück auf Bank 0
+ movf porta,w ; Takteingang lesen
+ andlw maske ; nur Takt 
+ movewf alterWert ; erster Vergleichswert
+resetCNT
+ clrf counter ; Counter auf Null setzen
+ bcf porta,overflow ; overflow zurücksetzen
+
+xxxx
+ movf counter,w
+ movwf portb ; Counterinhalt ausgeben
+ 
+mainloop
+ btfsc porta,reset ; Resteingang 1? 
+ goto resetCNT ; ja
+
+ btfsc porta,inhibit ; Zähler anhalten 1? 
+ goto mainloop ; ja
+ call checkEdge ; Flanke da?
+ iorlw 0 ;
+ btfsc status,zero
+ goto mainloop ; nein

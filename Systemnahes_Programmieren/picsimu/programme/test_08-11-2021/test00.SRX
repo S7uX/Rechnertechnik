@@ -1,0 +1,14 @@
+;Kommentar
+ device 16f84
+	
+status equ 03h
+rp0	equ 5
+
+counter equ 10h
+ org 0
+ 
+cold
+ 
+ movlw 10h
+ movwf counter
+ goto cold
