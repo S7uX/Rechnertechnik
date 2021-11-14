@@ -1,0 +1,15 @@
+# latex
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+
+# compiler
+*.bin
+*.ERR
+*.LST
+*.obj
+*.SRX
+*.SYM
+*.tdg
+*.ini

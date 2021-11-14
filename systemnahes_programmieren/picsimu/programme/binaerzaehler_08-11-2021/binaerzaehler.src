@@ -26,9 +26,9 @@ reset equ 1 ; Reseteingang RA1
 inhibit equ 2 ; Inhitbiteingang RA2 
 overflow equ 3 ; Zählerüberlauf RA3 
 
- org 0; Programm beginnt bei Adresse 0
+ org 0 ; Programm beginnt bei Adresse 0
  
-cold
+cold ; Kaltstart
  bsf status,rp0 ; auf Bank 1 umschlaten
  clrf trisb ; Port B alles Ausgang
  bcf trisa,overflow ; overflow auf Ausgang setzen
