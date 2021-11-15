@@ -45,7 +45,7 @@ cold
 ; ersten Wert lesen
  movf porta,w ; Port A ins W-file lesen
  andlw maske ; RA0 Zähleingang maskieren
- movewf alterWert ; W-file in alterWert Schreiben: Erster Vergleichswert
+ movwf alterWert ; W-file in alterWert Schreiben: Erster Vergleichswert
  
 resetCNT
  clrf counter ; Counter mit 0 initalisieren
@@ -62,8 +62,38 @@ mainloop
  btfsc porta,inhibit ; Inhibit-Eingang 1? 
  goto mainloop ; ja --> Zähler anhalten
  call checkEdge ; Flanke da? Nein --> W = 0, 
- iorlw 0 ; Inklusives oder mit x: 
- btfsc status,zero ; Prüfe ob iorlw 0 ergeben hat
+ xorlw 2 ; setze zero-flag wenn w = 2
+ btfss status,zero ; w = 2?
  goto mainloop ; nein
+  
+ bcf porta,carry ; Ausgabe carry = 0
+ incf counter ; counter-file++
+ btfsc status,zero ; overlfow?
+ bsf porta,carry ; ja 
+
+; Ausgabe counter
+ movf counter,w
+ movwf portb
+
+ goto mainloop
 
 checkEdge
+; aktuellen Wert lesen
+ movf porta,w ; Port A ins W-file lesen
+ andlw maske ; RA0 Zähleingang maskieren
+ movwf aktWert ; W-file in aktWert-File schreiben
+ xorwf alterWert,w
+ movwf flanke
+
+; alterWert = aktWert 
+ movf aktWert,w
+ movwf alterWert
+
+ movf flanke ; Setze zero-flag wenn flanke = 0 
+ btfsc status,zero ; flanke 0? 
+ retlw 0 ; nein
+ 
+ movf aktWert ; Setze zero-flag wenn aktWert = 0 
+ btfsc status,zero ; aktWert = 0
+ retlw 2 ; nein
+ retlw 1 ; ja
