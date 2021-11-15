@@ -1,6 +1,6 @@
 ; Binärzähler
 
- device 16f84
+    device 16f84
 
 ; \***************** Symbol Names **********************\
  
@@ -35,65 +35,65 @@ flanke equ 13h
  org 0 ; Programm beginnt bei Adresse 0
  
 cold
-; Ports initalisieren
- bsf status,rp0 ; auf Bank 1 umschlaten
- bcf trisa,carry ; Port A carry auf Ausgang setzen
- clrf trisb ; Port B alles Ausgang
+    ; Ports initalisieren
+    bsf status,rp0 ; auf Bank 1 umschalten
+    bcf trisa,carry ; Port A carry auf Ausgang setzen
+    clrf trisb ; Port B alles Ausgang
 
- bcf status,rp0 ; zurück auf Bank 0
+    bcf status,rp0 ; zurück auf Bank 0
 
-; ersten Wert lesen
- movf porta,w ; Port A ins W-file lesen
- andlw maske ; RA0 Zähleingang maskieren
- movwf alterWert ; W-file in alterWert Schreiben: Erster Vergleichswert
+    ; ersten Wert lesen
+    movf porta,w ; Port A ins W-file lesen
+    andlw maske ; RA0 Zähleingang maskieren
+    movwf alterWert ; W-file in alterWert Schreiben: Erster Vergleichswert
  
 resetCNT
- clrf counter ; Counter mit 0 initalisieren
- bcf porta,carry ; carry zurücksetzen
+    clrf counter ; Counter mit 0 initalisieren
+    bcf porta,carry ; carry zurücksetzen
 
 xxxx
- movf counter,w
- movwf portb ; Counterinhalt ausgeben
+    movf counter,w
+    movwf portb ; Counterinhalt ausgeben
  
 mainloop
- btfsc porta,reset ; Resteingang 1? 
- goto resetCNT ; ja --> reset
+    btfsc porta,reset ; Resteingang 1? 
+    goto resetCNT ; ja --> reset
 
- btfsc porta,inhibit ; Inhibit-Eingang 1? 
- goto mainloop ; ja --> Zähler anhalten
- call checkEdge ; Flanke da? Nein --> W = 0, 
- xorlw 2 ; setze zero-flag wenn w = 2
- btfss status,zero ; w = 2?
- goto mainloop ; nein
+    btfsc porta,inhibit ; Inhibit-Eingang 1? 
+    goto mainloop ; ja --> Zähler anhalten
+    call checkEdge ; Flanke da? Nein --> W = 0, 
+    xorlw 2 ; setze zero-flag wenn w = 2
+    btfss status,zero ; w = 2?
+    goto mainloop ; nein
   
- bcf porta,carry ; Ausgabe carry = 0
- incf counter ; counter-file++
- btfsc status,zero ; overlfow?
- bsf porta,carry ; ja 
+    bcf porta,carry ; Ausgabe carry = 0
+    incf counter ; counter-file++
+    btfsc status,zero ; overlfow?
+    bsf porta,carry ; ja 
 
-; Ausgabe counter
- movf counter,w
- movwf portb
+    ; Ausgabe counter
+    movf counter,w
+    movwf portb
 
- goto mainloop
+    goto mainloop
 
 checkEdge
-; aktuellen Wert lesen
- movf porta,w ; Port A ins W-file lesen
- andlw maske ; RA0 Zähleingang maskieren
- movwf aktWert ; W-file in aktWert-File schreiben
- xorwf alterWert,w
- movwf flanke
+    ; aktuellen Wert lesen
+    movf porta,w ; Port A ins W-file lesen
+    andlw maske ; RA0 Zähleingang maskieren
+    movwf aktWert ; W-file in aktWert-File schreiben
+    xorwf alterWert,w
+    movwf flanke
 
-; alterWert = aktWert 
- movf aktWert,w
- movwf alterWert
+    ; alterWert = aktWert 
+    movf aktWert,w
+    movwf alterWert
 
- movf flanke ; Setze zero-flag wenn flanke = 0 
- btfsc status,zero ; flanke 0? 
- retlw 0 ; nein
+    movf flanke ; Setze zero-flag wenn flanke = 0 
+    btfsc status,zero ; flanke 0? 
+    retlw 0 ; nein
  
- movf aktWert ; Setze zero-flag wenn aktWert = 0 
- btfsc status,zero ; aktWert = 0
- retlw 2 ; nein
- retlw 1 ; ja
+    movf aktWert ; Setze zero-flag wenn aktWert = 0 
+    btfsc status,zero ; aktWert = 0
+    retlw 2 ; nein
+    retlw 1 ; ja
