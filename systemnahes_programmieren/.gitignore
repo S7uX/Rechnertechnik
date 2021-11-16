@@ -7,6 +7,8 @@
 *.synctex.gz
 *.pygstyle
 *.pygtex
+*.xmpi
+*.xmpdata
 
 # compiler
 *.bin

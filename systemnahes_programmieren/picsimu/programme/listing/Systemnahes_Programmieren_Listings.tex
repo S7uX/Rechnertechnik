@@ -1,12 +1,17 @@
 %Document
 \documentclass[10pt,a4paper]{article} 
+\begin{filecontents*}[overwrite]{\jobname.xmpdata}
+    \Title{Systemnahes Programmieren Listings}
+    \Author{Valerio Cocco}
+    \Language{de}
+\end{filecontents*}
+\usepackage[a-3b]{pdfx}
 \usepackage[left=1cm,right=1cm,top=1cm,bottom=2cm]{geometry} 
 %Default packages
 \usepackage[ngerman]{babel} 
 \usepackage{fontspec}
 \usepackage{fancyhdr}
 \usepackage{lastpage}
-\usepackage{xcolor}
 \usepackage{xcolor}
 \usepackage[most, minted]{tcolorbox}
 % \usepackage[most, listings]{tcolorbox}
@@ -15,14 +20,12 @@
 %Meta
 \usepackage{hyperref}
 \hypersetup{
-    pdftitle={Systemnahes Programmieren Listings},
-    pdfauthor={Valerio Cocco},
 	hidelinks
 }
 
 \setmonofont{JetBrainsMono}[
-  Path = ./JetBrainsMono-2.242/fonts/ttf/,
-  Extension = .ttf,
+  Path = ./JetBrainsMono/,
+  Extension = .otf,
   % 
   UprightFont = *-Light,
   BoldFont = *-Bold,
@@ -73,6 +76,8 @@
 	boxrule=0.8pt,
 	colback=gray!10,
 	sharp corners,
+    top=0pt,
+    bottom=0pt,
 	listing file =#1
 }
 
