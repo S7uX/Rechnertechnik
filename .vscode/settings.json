@@ -1,9 +1,16 @@
 {
+    "latex-workshop.latex.option.maxPrintLine.enabled": false,
     "latex-workshop.latex.recipes": [
         {
             "name": "latexmk",
             "tools": [
                 "latexmk",
+            ]
+        },
+        {
+            "name": "lualatex",
+            "tools": [
+                "lualatex",
             ]
         }
     ],
@@ -19,6 +26,17 @@
                 "%DOC%"
             ],
             "env": {}
+        },
+        {
+            "name": "lualatex",
+            "command": "lualatex",
+            "args": [
+                "-synctex=0",
+                "--shell-escape",
+                "-interaction=nonstopmode",
+                "-file-line-error",
+                "%DOC%"
+            ]
         }
     ]
 }
