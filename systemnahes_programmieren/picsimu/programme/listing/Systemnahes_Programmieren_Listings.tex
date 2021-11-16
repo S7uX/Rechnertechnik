@@ -9,6 +9,7 @@
 \usepackage{xcolor}
 \usepackage{xcolor}
 \usepackage[most, minted]{tcolorbox}
+% \usepackage[most, listings]{tcolorbox}
 \usepackage{microtype}
 
 %Meta
@@ -41,6 +42,7 @@
 
 \newtcbinputlisting{assembler}[1]{%
     listing engine=minted,
+    % listing engine=listings,
     minted language=gas,
     listing only,
     breakable,
@@ -53,6 +55,15 @@
         numbersep=2mm,
 		baselinestretch=1.2
     },
+    % listing options={
+    %     language=Assembler,
+    %     basicstyle=\ttfamily\footnotesize,
+    %     numbers=left,
+    %     breaklines=true,
+    %     numberstyle=\tiny\ttfamily,
+    %     xleftmargin=0mm,
+    %     numbersep=2.5mm,
+    % },
     overlay={%
         \begin{tcbclipinterior}
             \fill[gray!30] (frame.south west) rectangle ([xshift=4mm]frame.north west);
@@ -65,7 +76,7 @@
 	listing file =#1
 }
 
-\renewcommand\theFancyVerbLine{\tiny\arabic{FancyVerbLine}}
+\renewcommand\theFancyVerbLine{\tiny\arabic{FancyVerbLine}} % minted
 
 \begin{document} 
 	\assembler{../binaerzaehler_aufg_1/binaerzaehler.src}
