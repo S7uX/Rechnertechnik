@@ -2,7 +2,7 @@
 
     device 16f84
 
-; \***************** Symbol Names **********************\
+; \***************** labels **********************\
  
 ; Statusregister
 status equ 3 ; Adresse des Statusregisters im RAM-File
@@ -16,7 +16,7 @@ porta equ 5
 takt equ 0 ; Zähleingang RA0
 reset equ 1 ; Reseteingang RA1
 inhibit equ 2 ; Inhitbiteingang RA2 
-carry equ 3 ; Carryausgang RA3 
+carryOut equ 3 ; Carryausgang RA3 
 maske equ 1 ; 00000001 ; Maske für Zähleingang RA0
 
 portb equ 6
@@ -27,17 +27,17 @@ trisb equ 6
 ; Variablen - Speichersetellen
 counter equ 10h ; 0c erste freie Adresse, 10h ist im Simulator leicht zu finden
 aktWert equ 11h
-alterWert equ 12h 
+alterWert equ 12h
 flanke equ 13h
 
-; \***************** Symbol Names **********************\
+; \***************** labels **********************\
 
  org 0 ; Programm beginnt bei Adresse 0
  
 cold
     ; Ports initalisieren
     bsf status,rp0 ; auf Bank 1 umschalten
-    bcf trisa,carry ; Port A carry auf Ausgang setzen
+    bcf trisa,carryOut ; Port A carry auf Ausgang setzen
     clrf trisb ; Port B alles Ausgang
 
     bcf status,rp0 ; zurück auf Bank 0
@@ -49,7 +49,7 @@ cold
  
 resetCNT
     clrf counter ; Counter mit 0 initalisieren
-    bcf porta,carry ; carry zurücksetzen
+    bcf porta,carryOut ; carry zurücksetzen
 
 xxxx
     movf counter,w
@@ -66,10 +66,10 @@ mainloop
     btfss status,zero ; w = 2?
     goto mainloop ; nein
   
-    bcf porta,carry ; Ausgabe carry = 0
+    bcf porta,carryOut ; Ausgabe carry = 0
     incf counter ; counter-file++
     btfsc status,zero ; overlfow?
-    bsf porta,carry ; ja 
+    bsf porta,carryOut ; ja 
 
     ; Ausgabe counter
     movf counter,w
