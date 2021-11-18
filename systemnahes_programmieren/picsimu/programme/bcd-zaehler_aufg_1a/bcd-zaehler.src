@@ -24,7 +24,7 @@ portb equ 6
 trisa equ 5
 trisb equ 6
 
-bcdMaxDigitValue = 9 ; 00001001
+bcdOverflowValue equ 10 ; 00001001
 
 ; Variablen - Speicherstellen
 bcdDigit0 equ 10h ; 0c erste freie Adresse, 10h ist im Simulator leicht zu finden
@@ -51,12 +51,11 @@ cold
     movwf alterWert ; W-file in alterWert Schreiben: erster Vergleichswert
  
 resetCNT
-    clrf counter ; Counter mit 0 initialisieren
+    clrf bcdDigit0 ; init
+    clrf bcdDigit1 ; init
     bcf porta,carryOut ; carry zurücksetzen
 
-    ; Counterinhalt ausgeben
-    movf counter,w
-    movwf portb 
+    clrf portb 
  
 mainloop
     btfsc porta,reset ; Resteingang 1? 
@@ -75,13 +74,12 @@ mainloop
     ; BCD erhöhen
     incf bcdDigit0 ; erste Stelle
     movf bcdDigit0,w
-    xorlw bcdMaxDigitValue
+    xorlw bcdOverflowValue
     btfsc status,zero ; overlfow bei erster Stelle?
-    goto bcd0Overflow; ja
+    call bcd0Overflow; ja
 
     ; BCD Ausgabe
-    movf bcdDigit1,w
-    swapf w
+    swapf bcdDigit1,0 ; ersten vier bits mit den letzen vier bits vertauschen; ,0 --> Ergebnis in w schreiben
     movwf portb
     movf bcdDigit0,w
     addwf portb
@@ -92,9 +90,9 @@ bcd0Overflow
     clrf bcdDigit0 ; bcdDigit0 = 0
     incf bcdDigit1 ; zweite Stelle 
     movf bcdDigit1,w
-    xorlw bcdMaxDigitValue
+    xorlw bcdOverflowValue
     btfsc status,zero ; overlfow bei zweiter Stelle?
-    goto bcd1Overflow
+    call bcd1Overflow
     return
 
 bcd1Overflow
