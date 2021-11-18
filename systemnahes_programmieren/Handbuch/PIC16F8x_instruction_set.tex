@@ -1,0 +1,19 @@
+%Document
+\documentclass[a4paper]{article} 
+\usepackage{pdfpages}
+\usepackage{graphicx}
+
+%Meta
+\usepackage{hyperref}
+\hypersetup{
+    pdftitle={PIC16F8X Manual},
+    pdfsubject={18-pin Flash/EEPROM 8-Bit Microcontrollers},
+    pdfauthor={1998 Microchip Technology Inc.},
+}
+
+\pagenumbering{gobble}
+
+\begin{document} 
+    \includepdfset{delta=-1cm -.6cm, nup=2x2,scale=0.55,noautoscale,angle=0,pagecommand={},frame=false}
+    \includepdf[pages=57-70]{PIC16F8x_Handbuch_20210412.pdf}
+\end{document}
