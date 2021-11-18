@@ -10,7 +10,7 @@ rp0 equ 5 ; Bank select
 carry equ 0 ; carry flag - Zeigt an, ob bei der letzten Rechenoperation ein Übertrag auftrat.
 zero equ 2 ; zero flag - Zeigt an, ob das Ergebnis einer Operation gleich 0 war.
 
-; PORTA
+; Port A bzw. 0
 porta equ 5
 ; Bitstellen von Port A 
 takt equ 0 ; Zähleingang RA0
@@ -20,11 +20,11 @@ carryOut equ 3 ; Carryausgang RA3
 maske equ 1 ; 00000001 ; Maske für Zähleingang RA0
 
 portb equ 6
-; TRIS: TRI-State. Mit einem TRIS Register kann Portpins auf Eingang oder Ausgang schalten. 
+; TRIS: TRI-State. Mit einem TRIS-Register können Portpins auf Eingang oder Ausgang geschaltet werden. 
 trisa equ 5
 trisb equ 6
 
-; Variablen - Speichersetellen
+; Variablen - Speicherstellen
 counter equ 10h ; 0c erste freie Adresse, 10h ist im Simulator leicht zu finden
 aktWert equ 11h
 alterWert equ 12h
@@ -35,7 +35,7 @@ flanke equ 13h
  org 0 ; Programm beginnt bei Adresse 0
  
 cold
-    ; Ports initalisieren
+    ; Ports initialisieren
     bsf status,rp0 ; auf Bank 1 umschalten
     bcf trisa,carryOut ; Port A carry auf Ausgang setzen
     clrf trisb ; Port B alles Ausgang
@@ -45,15 +45,15 @@ cold
     ; ersten Wert lesen
     movf porta,w ; Port A ins W-file lesen
     andlw maske ; RA0 Zähleingang maskieren
-    movwf alterWert ; W-file in alterWert Schreiben: Erster Vergleichswert
+    movwf alterWert ; W-file in alterWert Schreiben: erster Vergleichswert
  
 resetCNT
-    clrf counter ; Counter mit 0 initalisieren
+    clrf counter ; Counter mit 0 initialisieren
     bcf porta,carryOut ; carry zurücksetzen
 
-xxxx
+    ; Counterinhalt ausgeben
     movf counter,w
-    movwf portb ; Counterinhalt ausgeben
+    movwf portb 
  
 mainloop
     btfsc porta,reset ; Resteingang 1? 
@@ -61,13 +61,14 @@ mainloop
 
     btfsc porta,inhibit ; Inhibit-Eingang 1? 
     goto mainloop ; ja --> Zähler anhalten
-    call checkEdge ; Flanke da? Nein --> W = 0, 
-    xorlw 2 ; setze zero-flag wenn w = 2
+
+    call checkEdge ; Flanke da? Nein --> w = 0, 
+    xorlw 2 ; setze zero-flag bei steigender Flanke w = 2
     btfss status,zero ; w = 2?
     goto mainloop ; nein
   
     bcf porta,carryOut ; Ausgabe carry = 0
-    incf counter ; counter-file++
+    incf counter ; counter++
     btfsc status,zero ; overlfow?
     bsf porta,carryOut ; ja 
 
@@ -79,21 +80,22 @@ mainloop
 
 checkEdge
     ; aktuellen Wert lesen
-    movf porta,w ; Port A ins W-file lesen
+    movf porta,w ; Port A ins w-file lesen
     andlw maske ; RA0 Zähleingang maskieren
-    movwf aktWert ; W-file in aktWert-File schreiben
-    xorwf alterWert,w
-    movwf flanke
+    movwf aktWert ; w-file in aktWert-File schreiben
+    xorwf alterWert,w ; mit alterWert vergleichen
+    movwf flanke ;
 
-    ; alterWert = aktWert 
+    ; alterWert = aktWert
     movf aktWert,w
     movwf alterWert
 
-    movf flanke ; Setze zero-flag wenn flanke = 0 
-    btfsc status,zero ; flanke 0? 
-    retlw 0 ; nein
+    ; flanke = 0 wenn aktWert = alterWert
+    movf flanke ; setze zero-flag wenn flanke = 0
+    btfsc status,zero ; flanke 0?
+    retlw 0 ; nein: keine neue Flanke
  
-    movf aktWert ; Setze zero-flag wenn aktWert = 0 
-    btfsc status,zero ; aktWert = 0
-    retlw 2 ; nein
-    retlw 1 ; ja
+    movf aktWert ; setze zero-flag wenn flanke = 0
+    btfss status,zero ; aktWert = 0? / zero = 1? 
+    retlw 2 ; nein: steigende Flanke
+    retlw 1 ; ja: fallende Flanke
