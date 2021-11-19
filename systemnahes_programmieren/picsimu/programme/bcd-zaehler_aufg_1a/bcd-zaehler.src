@@ -1,4 +1,4 @@
-; Binärzähler
+; BCD-Zähler
 
     device 16f84
 
