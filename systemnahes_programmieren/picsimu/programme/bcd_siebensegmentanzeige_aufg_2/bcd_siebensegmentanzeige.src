@@ -1,4 +1,4 @@
-; BCD-Zähler
+; BCD to seven segment display
 
     device 16f84
 
@@ -42,7 +42,7 @@ mainloop
 bcdToSsd ; Sevent Segtment Display
     movf bcdin,w
 
-    addwf pcl
+    addwf pcl ; unsave: undefined behavior if bcdin > 9
     retlw 3Fh ; 0
     retlw 6h ; 1
     retlw 5Bh ; 2
