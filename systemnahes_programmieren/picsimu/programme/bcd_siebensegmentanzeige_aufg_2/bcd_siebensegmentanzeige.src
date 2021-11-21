@@ -1,0 +1,54 @@
+; BCD-Zähler
+
+    device 16f84
+
+; \***************** labels **********************\
+pcl equ 2 ; program counter
+status equ 3 ; status register
+rp0 equ 5 ; bank select
+carry equ 0 ; carry flag - Indicates when an arithmetic carry or borrow has been generated out of the most significant ALU bit position.
+zero equ 2 ; zero flag - Indicates that the result of an operation was zero.
+
+; input: port A input
+porta equ 5
+trisa equ 5
+bcdmask equ Fh ; 00001111
+
+; output: port B
+trisb equ 6
+
+; variables
+bcdin equ 10h
+
+; \***************** labels **********************\
+
+    org 0
+
+cold
+    ; init
+    bsf status,rp0 ; select bank 1
+    clrf trisb ; set port b to output
+    bcf status,rp0 ; select bank 0
+
+mainloop
+    movf porta,w
+    andlw bcdmask
+    movwf bcdin
+    call bcdToSevenSegmentDisplay
+    movwf portb
+    goto mainloop
+
+bcdToSevenSegmentDisplay
+    movf bcdin,w
+
+    addwf pcl
+    retlw 3Fh ; 0
+    retlw 6h ; 1
+    retlw 5Bh ; 2
+    retlw 4Fh ; 3
+    retlw 66h ; 4
+    retlw 6Dh ; 5
+    retlw 7Dh ; 6
+    retlw 7h ; 7
+    retlw 7F ; 8
+    retlw 5F ; 9

@@ -28,14 +28,14 @@ bcdOverflowValue equ 10 ; 00001001
 
 ; Variablen - Speicherstellen
 bcdDigit0 equ 10h ; 0c erste freie Adresse, 10h ist im Simulator leicht zu finden
-bcdDigit1 equ 11h 
+bcdDigit1 equ 11h
 aktWert equ 12h
 alterWert equ 13h
 flanke equ 14h
 
 ; \***************** labels **********************\
 
- org 0 ; Programm beginnt bei Adresse 0
+    org  0 ; Programm beginnt bei Adresse 0
  
 cold
     ; Ports initialisieren

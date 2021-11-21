@@ -32,7 +32,7 @@ flanke equ 13h
 
 ; \***************** labels **********************\
 
- org 0 ; Programm beginnt bei Adresse 0
+    org 0 ; Programm beginnt bei Adresse 0
  
 cold
     ; Ports initialisieren
