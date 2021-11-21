@@ -15,6 +15,7 @@ trisa equ 5
 bcdmask equ Fh ; 00001111
 
 ; output: port B
+portb equ 6
 trisb equ 6
 
 ; variables
@@ -34,11 +35,11 @@ mainloop
     movf porta,w
     andlw bcdmask
     movwf bcdin
-    call bcdToSevenSegmentDisplay
+    call bcdToSsd
     movwf portb
     goto mainloop
 
-bcdToSevenSegmentDisplay
+bcdToSsd ; Sevent Segtment Display
     movf bcdin,w
 
     addwf pcl
@@ -50,5 +51,5 @@ bcdToSevenSegmentDisplay
     retlw 6Dh ; 5
     retlw 7Dh ; 6
     retlw 7h ; 7
-    retlw 7F ; 8
-    retlw 5F ; 9
+    retlw 7Fh ; 8
+    retlw 5Fh ; 9
