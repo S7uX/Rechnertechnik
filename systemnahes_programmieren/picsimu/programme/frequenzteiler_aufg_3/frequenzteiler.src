@@ -1,0 +1,62 @@
+; frequency divider
+
+    device 16f84
+
+; \***************** labels **********************\
+pcl equ 2 ; program counter
+status equ 3 ; status register
+rp0 equ 5 ; bank select
+carry equ 0 ; carry flag - Indicates when an arithmetic carry or borrow has been generated out of the most significant ALU bit position.
+zero equ 2 ; zero flag - Indicates that the result of an operation was zero.
+
+porta equ 5
+output equ 1 ; out an ra1
+trisa equ 5
+
+currentValue equ 10h
+oldValue equ 11h
+edge equ 12h
+
+mask equ 00000001b
+; \***************** labels **********************\
+
+cold
+    bsf status,rp0 ; select bank 1
+    bcf trisa,output
+    bcf status,rp0 ; select bank 0
+
+    ; read initial value
+    movf porta,w
+    andlw mask
+    movwf oldValue
+
+mainloop
+    call checkEdge
+    xorlw 2 ; rising edge?
+    btfss status,zero
+    goto mainloop ; no
+    ; yes
+    movlw 10b
+    xorwf porta
+    goto mainloop
+
+checkEdge
+    movf porta,w 
+    andlw mask
+    movwf currentValue
+    xorwf oldValue,w
+    movwf edge
+
+    ; oldValue := currentValue
+    movf currentValue,w
+    movwf oldValue
+
+    ; edge = 0 if currentValue = oldValue
+    movf edge ; set zero-flag if edge = 0
+    btfsc status,zero ; edge 0?
+    retlw 0 ; no --> no new edge
+ 
+    movf currentValue ; set zero-flag if currentValue = 0
+    btfss status,zero ; currentValue = 0? / zero = 1? 
+    retlw 2 ; no --> rising edge
+    retlw 1 ; ja --> falling edge

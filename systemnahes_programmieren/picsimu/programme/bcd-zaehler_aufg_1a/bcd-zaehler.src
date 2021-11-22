@@ -24,11 +24,12 @@ portb equ 6
 trisa equ 5
 trisb equ 6
 
-bcdOverflowValue equ 10 ; 00001001
+bcdOverfV0 equ 10 ; 0000 1010
+bcdOverfV1 equ 0A0h ; 1010 0000
+bcdMask equ 0Fh ; 0000 1111
 
 ; Variablen - Speicherstellen
-bcdDigit0 equ 10h ; 0c erste freie Adresse, 10h ist im Simulator leicht zu finden
-bcdDigit1 equ 11h
+counter equ 10h ; 0c erste freie Adresse, 10h ist im Simulator leicht zu finden
 aktWert equ 12h
 alterWert equ 13h
 flanke equ 14h
@@ -51,13 +52,17 @@ cold
     movwf alterWert ; W-file in alterWert Schreiben: erster Vergleichswert
  
 resetCNT
-    clrf bcdDigit0 ; init
-    clrf bcdDigit1 ; init
+    clrf counter ; init
     bcf porta,carryOut ; carry zurücksetzen
 
     clrf portb 
+    bcf porta,carryOut ; Ausgabe carry = 0
  
 mainloop
+    ; BCD Ausgabe
+    movf counter,w
+    movwf portb
+
     btfsc porta,reset ; Resteingang 1? 
     goto resetCNT ; ja --> reset
 
@@ -68,37 +73,30 @@ mainloop
     xorlw 2 ; setze zero-flag bei steigender Flanke w = 2
     btfss status,zero ; w = 2?
     goto mainloop ; nein
-  
+    
     bcf porta,carryOut ; Ausgabe carry = 0
-
+  
     ; BCD erhöhen
-    incf bcdDigit0 ; erste Stelle
-    movf bcdDigit0,w
-    xorlw bcdOverflowValue
-    btfsc status,zero ; overlfow bei erster Stelle?
-    call bcd0Overflow; ja
+    incf counter ; erste Stelle
+    movf counter,w
+    andlw bcdMask ; erste Stelle maskieren
+    xorlw bcdOverfV0 ; overlfow bei erster Stelle?
+    btfss status,zero 
+    goto mainloop; nein
+    ; ja
+    movf counter,w
+    xorlw bcdOverfV0 ; Erste vier bit auf null
+    addlw 10h ; increment second nibble
+    movwf counter
 
-    ; BCD Ausgabe
-    swapf bcdDigit1,0 ; ersten vier bits mit den letzen vier bits vertauschen; ,0 --> Ergebnis in w schreiben
-    movwf portb
-    movf bcdDigit0,w
-    addwf portb
+    xorlw bcdOverfV1 ; overflow bei zweiter Stelle?
+    btfss status,zero 
+    goto mainloop; nein
+    ; ja
+    clrf counter 
+    bsf porta,carryOut
 
     goto mainloop
-
-bcd0Overflow
-    clrf bcdDigit0 ; bcdDigit0 = 0
-    incf bcdDigit1 ; zweite Stelle 
-    movf bcdDigit1,w
-    xorlw bcdOverflowValue
-    btfsc status,zero ; overlfow bei zweiter Stelle?
-    call bcd1Overflow
-    return
-
-bcd1Overflow
-    clrf bcdDigit1 ; bcdDigit1 = 0
-    bsf porta,carryOut
-    return
 
 checkEdge
     ; aktuellen Wert lesen
@@ -108,7 +106,7 @@ checkEdge
     xorwf alterWert,w ; mit alterWert vergleichen
     movwf flanke ;
 
-    ; alterWert = aktWert
+    ; alterWert := aktWert
     movf aktWert,w
     movwf alterWert
 
