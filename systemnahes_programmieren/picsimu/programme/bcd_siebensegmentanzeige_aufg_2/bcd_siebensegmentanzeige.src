@@ -58,3 +58,6 @@ bcdToSsd ; Sevent Segtment Display
     retlw 07h ; 7
     retlw 7Fh ; 8
     retlw 6Fh ; 9
+    ; retlw 0 ; A
+    ; retlw 0 ; B
+    ; ...
