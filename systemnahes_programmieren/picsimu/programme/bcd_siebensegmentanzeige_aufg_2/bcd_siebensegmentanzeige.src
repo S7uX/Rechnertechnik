@@ -4,6 +4,7 @@
 
 ; \***************** labels **********************\
 pcl equ 2 ; program counter
+
 status equ 3 ; status register
 rp0 equ 5 ; bank select
 carry equ 0 ; carry flag - Indicates when an arithmetic carry or borrow has been generated out of the most significant ALU bit position.

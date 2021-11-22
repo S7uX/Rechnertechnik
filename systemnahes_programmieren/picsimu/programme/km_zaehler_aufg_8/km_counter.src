@@ -1,0 +1,32 @@
+; km counter
+
+    device 16f84
+
+; \***************** labels **********************\
+pcl equ 2 ; program counter
+
+status equ 3 ; status register
+rp0 equ 5 ; bank select
+carry equ 0 ; carry flag - Indicates when an arithmetic carry or borrow has been generated out of the most significant ALU bit position.
+zero equ 2 ; zero flag - Indicates that the result of an operation was zero.
+
+fsr equ 4 ; Indirect data memory address pointer 0.
+
+indf equ 0; Uses contents of FSR to address data memory (not a physical register).
+
+; input: port A input
+porta equ 5
+trisa equ 5
+ra0 equ 0
+ra1 equ 1
+ra2 equ 2
+ra3 equ 3
+bcdmask equ 0Fh ; 00001111
+
+; output: port B
+portb equ 6
+trisb equ 6
+
+
+
+; \***************** labels **********************\
