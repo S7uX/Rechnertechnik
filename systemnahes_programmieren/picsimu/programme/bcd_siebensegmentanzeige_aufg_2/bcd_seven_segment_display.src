@@ -1,4 +1,4 @@
-; BCD to seven segment display
+; BCD to seven segment display © Valerio Cocco
 
     device 16f84
 

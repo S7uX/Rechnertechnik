@@ -1,0 +1,120 @@
+; BCD counter © Valerio Cocco
+
+    device 16f84
+
+; \***************** labels **********************\
+ 
+; status regsiter
+status equ 3 ; adress of the status register
+rp0 equ 5 ; bank select
+carry equ 0 ; carry flag - Indicates when an arithmetic carry or borrow has been generated out of the most significant ALU bit position.
+zero equ 2 ; zero flag - Indicates that the result of an operation was zero.
+
+; port a 
+porta equ 5
+clock equ 0 ; clock signal in RA0
+reset equ 1 ; reset in RA1
+inhibit equ 2 ; inhibit in RA2 
+carryOut equ 3 ; carry out RA3 
+maske equ 1 ; 00000001 ; mask for the clock signal on RA0
+
+portb equ 6
+; TRIS (TRIState regsiter) Used to define the direction (in/out) of port or pin. 
+trisa equ 5 ; for port a 
+trisb equ 6 ; for port b
+
+bcdOverfVal0 equ 10 ; 0000 1010
+bcdOverfVal1 equ 0A0h ; 1010 0000
+bcdMask equ 0Fh ; 0000 1111, mask for the first bcd digit
+
+; variables
+counter equ 10h ; 0c first aviable adress
+currentValue equ 12h
+oldValue equ 13h
+edge equ 14h
+
+; \***************** labels **********************\
+
+    org  0 ; program start at adress 0
+ 
+cold
+    ; initialize ports
+    bsf status,rp0 ; select bank 1
+    bcf trisa,carryOut ; set carry on port a to out
+    clrf trisb ; set port all to out
+
+    bcf status,rp0 ; select bank 0
+
+    ; read first value
+    movf porta,w ; read port a in w
+    andlw maske ; mask clock signal
+    movwf oldValue ; write w regsiter to oldValue: first comparison value
+ 
+resetCNT
+    clrf counter ; init
+    bcf porta,carryOut ; reset carry
+
+    clrf portb
+    bcf porta,carryOut ; output carry 0
+ 
+mainloop
+    ; output BCD
+    movf counter,w
+    movwf portb
+
+    btfsc porta,reset ; reset in = 1? 
+    goto resetCNT ; yes --> reset
+
+    btfsc porta,inhibit ; inhibit = 1? 
+    goto mainloop ; yes --> pause
+
+    call checkEdge ; edge? no --> w = 0, 
+    xorlw 2 ; w = 2 (rising redge)? set zero flag if w = 2
+    btfss status,zero ; w = 2?
+    goto mainloop ; no
+    
+    bcf porta,carryOut ; output carry 0
+  
+    ; increment BCD
+    incf counter ; first digit
+    movf counter,w
+    andlw bcdMask ; mask first digit
+    xorlw bcdOverfVal0 ; overlfow on first digit?
+    btfss status,zero
+    goto mainloop ; no
+    ; yes
+    movf counter,w
+    xorlw bcdOverfVal0 ; set first nibble to 0
+    addlw 10h ; increment second nibble
+    movwf counter
+
+    xorlw bcdOverfVal1 ; overflow on second digit?
+    btfss status,zero
+    goto mainloop; no
+    ; yes
+    clrf counter
+    bsf porta,carryOut
+
+    goto mainloop
+
+checkEdge
+    ; read current value
+    movf porta,w
+    andlw maske ; mask clock signal on RA0
+    movwf currentValue
+    xorwf oldValue,w ; compare with oldValue
+    movwf edge
+
+    ; oldValue := currentValue
+    movf currentValue,w
+    movwf oldValue
+
+    ; edge = 0 if currentValue = oldValue
+    movf edge ; set zero-flag if edge = 0
+    btfsc status,zero ; edge 0?
+    retlw 0 ; no --> no new edge
+ 
+    movf currentValue ; set zero-flag if currentValue = 0
+    btfss status,zero ; currentValue = 0? or zero = 1? 
+    retlw 2 ; no --> rising edge
+    retlw 1 ; yes --> falling edge

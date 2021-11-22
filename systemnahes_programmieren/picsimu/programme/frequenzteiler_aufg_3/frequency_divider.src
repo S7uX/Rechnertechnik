@@ -1,4 +1,4 @@
-; frequency divider
+; frequency divider © Valerio Cocco
 
     device 16f84
 
@@ -40,7 +40,7 @@ mainloop
     goto mainloop
 
 checkEdge
-    movf porta,w 
+    movf porta,w
     andlw mask
     movwf currentValue
     xorwf oldValue,w
