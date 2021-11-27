@@ -21,12 +21,103 @@ ra0 equ 0
 ra1 equ 1
 ra2 equ 2
 ra3 equ 3
-bcdmask equ 0Fh ; 00001111
+
+; literals
+bcdMask equ 0Fh ; 00001111
+sigMask equ 00001000b ;
 
 ; output: port B
 portb equ 6
 trisb equ 6
 
 
+; variables
+bcdin 9h
+signalCounter 10h
+currentVal 11h
+oldVal 12h
+kmCounter equ 13h
 
 ; \***************** labels **********************\
+
+    org 0
+
+cold
+    ; init ports
+    bsf status,rp0 ; select bank 1
+    clrf trisb ; set port b to output, RB0 is LSB
+    bcf trisa,ra0 ; set RA0 to output: digit 0 select
+    bcf trisa,ra1 ; digit 1 select
+    bcf trisa,ra2 ; digit 2 select
+    bcf status,rp0 ; select bank 0
+
+    bsf porta,ra3 ; sig in
+
+    ; init variables
+    clrf signalCounter
+    clrf kmCounter ; dm at 10h
+    clrf 14h ; m
+    clrf 15h ; 1xxm
+    clrf 16h ; km
+    clrf 17h ; 1x km
+
+    ; read first value
+    movf porta,w ; read port a in w
+    andlw sigMask
+    movwf oldValue
+
+mainloop
+    ; output todo
+
+    call checkEdge ; edge? no --> w = 0, 
+    xorlw 2 ; w = 2 (rising redge)? set zero flag if w = 2
+    btfss status,zero ; w = 2?
+    goto mainloop ; no
+    incf signalCounter
+    movf signalCounter,w
+    xorlw 8 ; countet 8 signals?
+    btfss status,zero
+    goto mainloop
+    clrf signalCounter
+
+    ; increment km counter todo
+
+checkEdge
+    ; read current value
+    movf porta,w
+    andlw mask ; mask clock signal on RA0
+    movwf currentValue
+    xorwf oldValue,w ; compare with oldValue
+    movwf edge
+
+    ; oldValue := currentValue
+    movf currentValue,w
+    movwf oldValue
+
+    ; edge = 0 if currentValue = oldValue
+    movf edge ; set zero-flag if edge = 0
+    btfsc status,zero ; edge 0?
+    retlw 0 ; no --> no new edge
+ 
+    movf currentValue ; set zero-flag if currentValue = 0
+    btfss status,zero ; currentValue = 0? or zero = 1? 
+    retlw 2 ; no --> rising edge
+    retlw 1 ; yes --> falling edge
+
+bcdToSsd ; Sevent Segtment Display
+    movf bcdin,w
+
+    addwf pcl ; unsave: undefined behavior if bcdin > 9
+    retlw 3Fh ; 0
+    retlw 06h ; 1
+    retlw 5Bh ; 2
+    retlw 4Fh ; 3
+    retlw 66h ; 4
+    retlw 6Dh ; 5
+    retlw 7Dh ; 6
+    retlw 07h ; 7
+    retlw 7Fh ; 8
+    retlw 6Fh ; 9
+    ; retlw 0 ; A
+    ; retlw 0 ; B
+    ; ...

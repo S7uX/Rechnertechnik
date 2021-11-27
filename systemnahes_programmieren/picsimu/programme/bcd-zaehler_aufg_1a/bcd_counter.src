@@ -16,7 +16,7 @@ clock equ 0 ; clock signal in RA0
 reset equ 1 ; reset in RA1
 inhibit equ 2 ; inhibit in RA2 
 carryOut equ 3 ; carry out RA3 
-maske equ 1 ; 00000001 ; mask for the clock signal on RA0
+mask equ 1 ; 00000001 ; mask for the clock signal on RA0
 
 portb equ 6
 ; TRIS (TRIState regsiter) Used to define the direction (in/out) of port or pin. 
@@ -47,7 +47,7 @@ cold
 
     ; read first value
     movf porta,w ; read port a in w
-    andlw maske ; mask clock signal
+    andlw mask ; mask clock signal
     movwf oldValue ; write w regsiter to oldValue: first comparison value
  
 resetCNT
@@ -100,7 +100,7 @@ mainloop
 checkEdge
     ; read current value
     movf porta,w
-    andlw maske ; mask clock signal on RA0
+    andlw mask ; mask clock signal on RA0
     movwf currentValue
     xorwf oldValue,w ; compare with oldValue
     movwf edge
