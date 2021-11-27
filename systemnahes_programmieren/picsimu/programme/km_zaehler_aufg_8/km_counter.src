@@ -55,9 +55,9 @@ cold
 
     ; init variables
     clrf signalCounter
-    clrf kmCounter ; dm at 10h
+    clrf kmCounter ; dm at 13h
     clrf 14h ; m
-    clrf 15h ; 1xxm
+    clrf 15h ; 1xx m
     clrf 16h ; km
     clrf 17h ; 1x km
 
@@ -78,9 +78,27 @@ mainloop
     xorlw 8 ; counted 8 signals?
     btfss status,zero
     goto mainloop
-    clrf signalCounter
 
+    clrf signalCounter
     ; increment km counter todo
+    movwf kmCounter
+    movwf fsr
+bcdinc
+    incf indf
+    movf indf,w
+    xorlw 10 ; bcd overflow?
+    btfss status,zero
+    goto mainloop ; no
+    ; yes
+    clrf indf ; clear overflown bcd digit
+    ; increment next digit
+    movf fsr,w
+    xorlw 17h ; out of bounds?
+    btfsc status,zero
+    goto mainloop ; yes
+    ; no
+    incf fsr
+    goto bcdinc
 
 checkEdge
     ; read current value
