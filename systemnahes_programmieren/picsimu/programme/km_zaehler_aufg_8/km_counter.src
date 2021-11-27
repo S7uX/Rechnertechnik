@@ -75,7 +75,7 @@ mainloop
     goto mainloop ; no
     incf signalCounter
     movf signalCounter,w
-    xorlw 8 ; countet 8 signals?
+    xorlw 8 ; counted 8 signals?
     btfss status,zero
     goto mainloop
     clrf signalCounter
