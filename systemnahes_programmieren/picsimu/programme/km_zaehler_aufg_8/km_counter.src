@@ -23,7 +23,6 @@ ra2 equ 2
 ra3 equ 3
 
 ; literals
-bcdMask equ 0Fh ; 00001111
 sigMask equ 00001000b ;
 
 ; output: port B
@@ -32,10 +31,11 @@ trisb equ 6
 
 
 ; variables
-bcdin 9h
-signalCounter 10h
-currentVal 11h
-oldVal 12h
+edge equ 8h
+bcdin equ 9h
+signalCounter equ 10h
+currentVal equ 11h
+oldVal equ 12h
 mCounter equ 13h
 kmCounter equ 16h
 
@@ -61,7 +61,7 @@ cold
 
     ; init variables
     clrf signalCounter
-    clrf mCounter ; m at 13h
+    clrf mCounter ; 1x m at 13h
     clrf 14h ; 1xx m
     clrf 15h ; km
     clrf kmCounter ; 1x km at 16h
@@ -69,34 +69,32 @@ cold
     ; read first value
     movf porta,w ; read port a in w
     andlw sigMask
-    movwf oldValue
+    movwf oldVal
 
-    ; init digits
-
-
-mainloop
+outputSsd
     ; output digit 0
     movf 14h,w
     movwf bcdin
     call bcdToSsd
     movwf portb
-    bcf porta,rp0
-    bsf porta,rp0
+    bcf porta,ra0
+    bsf porta,ra0
     ; digit 1
     movf 15h,w
     movwf bcdin
     call bcdToSsd
     movwf portb
-    bcf porta,rp1
-    bsf porta,rp1
+    bcf porta,ra1
+    bsf porta,ra1
     ; digit 2
     movf kmCounter,w
     movwf bcdin
     call bcdToSsd
     movwf portb
-    bcf porta,rp2
-    bsf porta,rp2
+    bcf porta,ra2
+    bsf porta,ra2
 
+mainloop
     ; check signal
     call checkEdge ; edge? no --> w = 0, 
     xorlw 2 ; w = 2 (rising redge)? set zero flag if w = 2
@@ -104,27 +102,27 @@ mainloop
     goto mainloop ; no
     incf signalCounter
     movf signalCounter,w
-    xorlw 5 ; counted 5 signals? 5 signals --> 1 m
+    xorlw 5 ; counted 5 signals? 5 signals --> 10 m
     btfss status,zero
     goto mainloop
 
     clrf signalCounter ; reset signal counter
     ; increment meter counter
-    movf mCounter,w ; meter counter
+    movlw mCounter,w ; meter counter
     movwf fsr
 bcdinc
     incf indf
     movf indf,w
     xorlw 10 ; bcd overflow?
     btfss status,zero
-    goto mainloop ; no
+    goto outputSsd ; no
     ; yes
     clrf indf ; clear overflown bcd digit
     ; increment next digit
     movf fsr,w
     xorlw kmCounter ; out of bounds?
     btfsc status,zero
-    goto mainloop ; yes
+    goto outputSsd ; yes
     ; no
     incf fsr
     goto bcdinc
@@ -132,22 +130,22 @@ bcdinc
 checkEdge
     ; read current value
     movf porta,w
-    andlw mask ; mask clock signal on RA0
-    movwf currentValue
-    xorwf oldValue,w ; compare with oldValue
+    andlw sigMask ; mask clock signal on RA0
+    movwf currentVal
+    xorwf oldVal,w ; compare with oldVal
     movwf edge
 
-    ; oldValue := currentValue
-    movf currentValue,w
-    movwf oldValue
+    ; oldVal := currentVal
+    movf currentVal,w
+    movwf oldVal
 
-    ; edge = 0 if currentValue = oldValue
+    ; edge = 0 if currentVal = oldVal
     movf edge ; set zero-flag if edge = 0
     btfsc status,zero ; edge 0?
     retlw 0 ; no --> no new edge
  
-    movf currentValue ; set zero-flag if currentValue = 0
-    btfss status,zero ; currentValue = 0? or zero = 1? 
+    movf currentVal ; set zero-flag if currentVal = 0
+    btfss status,zero ; currentVal = 0? or zero = 1? 
     retlw 2 ; no --> rising edge
     retlw 1 ; yes --> falling edge
 
@@ -167,4 +165,4 @@ bcdToSsd ; Sevent Segtment Display
     retlw 6Fh ; 9
     ; retlw 0 ; A
     ; retlw 0 ; B
-    ; ...
+    ; ...    
