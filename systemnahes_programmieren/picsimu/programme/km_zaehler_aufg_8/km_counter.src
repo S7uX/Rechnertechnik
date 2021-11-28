@@ -36,7 +36,8 @@ bcdin 9h
 signalCounter 10h
 currentVal 11h
 oldVal 12h
-kmCounter equ 13h
+mCounter equ 13h
+kmCounter equ 16h
 
 ; \***************** labels **********************\
 
@@ -49,39 +50,67 @@ cold
     bcf trisa,ra0 ; set RA0 to output: digit 0 select
     bcf trisa,ra1 ; digit 1 select
     bcf trisa,ra2 ; digit 2 select
+    bsf trisa,ra3 ; sig in
     bcf status,rp0 ; select bank 0
 
-    bsf porta,ra3 ; sig in
+    clrf portb
+    ; lock every digit select
+    bsf porta,ra0 
+    bsf porta,ra1
+    bsf porta,ra2
 
     ; init variables
     clrf signalCounter
-    clrf kmCounter ; dm at 13h
-    clrf 14h ; m
-    clrf 15h ; 1xx m
-    clrf 16h ; km
-    clrf 17h ; 1x km
+    clrf mCounter ; m at 13h
+    clrf 14h ; 1xx m
+    clrf 15h ; km
+    clrf kmCounter ; 1x km at 16h
 
     ; read first value
     movf porta,w ; read port a in w
     andlw sigMask
     movwf oldValue
 
-mainloop
-    ; output todo
+    ; init digits
 
+
+mainloop
+    ; output digit 0
+    movf 14h,w
+    movwf bcdin
+    call bcdToSsd
+    movwf portb
+    bcf porta,rp0
+    bsf porta,rp0
+    ; digit 1
+    movf 15h,w
+    movwf bcdin
+    call bcdToSsd
+    movwf portb
+    bcf porta,rp1
+    bsf porta,rp1
+    ; digit 2
+    movf kmCounter,w
+    movwf bcdin
+    call bcdToSsd
+    movwf portb
+    bcf porta,rp2
+    bsf porta,rp2
+
+    ; check signal
     call checkEdge ; edge? no --> w = 0, 
     xorlw 2 ; w = 2 (rising redge)? set zero flag if w = 2
     btfss status,zero ; w = 2?
     goto mainloop ; no
     incf signalCounter
     movf signalCounter,w
-    xorlw 8 ; counted 8 signals?
+    xorlw 5 ; counted 5 signals? 5 signals --> 1 m
     btfss status,zero
     goto mainloop
 
-    clrf signalCounter
-    ; increment km counter todo
-    movwf kmCounter
+    clrf signalCounter ; reset signal counter
+    ; increment meter counter
+    movf mCounter,w ; meter counter
     movwf fsr
 bcdinc
     incf indf
@@ -93,7 +122,7 @@ bcdinc
     clrf indf ; clear overflown bcd digit
     ; increment next digit
     movf fsr,w
-    xorlw 17h ; out of bounds?
+    xorlw kmCounter ; out of bounds?
     btfsc status,zero
     goto mainloop ; yes
     ; no
