@@ -1,0 +1,60 @@
+; bowling © Valerio Cocco
+
+    device 16f84
+
+; \***************** labels **********************\
+ 
+; status regsiter
+status equ 3 ; adress of the status register
+rp0 equ 5 ; bank select
+zero equ 2 ; zero flag - Indicates that the result of an operation was zero.
+carry equ 0
+
+; port a 
+porta equ 5
+portb equ 6
+; TRIS (TRIState regsiter) Used to define the direction (in/out) of port or pin. 
+trisa equ 5 ; for port a 
+trisb equ 6 ; for port b
+
+; variables
+kegelCounter equ 10h
+initialMask equ 00000001b
+mask equ 11h
+index equ 12h
+
+; \***************** labels **********************\
+
+    org  0 ; program start at adress 0
+ 
+cold
+    ; initialize ports
+    bsf status,rp0 ; select bank 1
+    clrf trisa
+    bsf trisa,0 ; ra0 in
+    bcf status,rp0 ; select bank 0
+
+mainloop
+    call countKegel
+
+countKegel
+    movlw initialMask
+    movwf mask
+    clrf index
+    clrf kegelCounter
+    bcf status,carry ; clear carry from previouse loop
+countLoop
+    movf portb,w
+    andwf mask,w ; mask single kegel
+    xorwf mask,w ; high signal?
+    btfsc status,zero
+    incf kegelCounter ; yes
+    rlf mask,1 ; shift mask
+    incf index
+    movf index,w
+    xorlw 8 ; loop end?
+    btfss status,zero
+    goto countLoop ; no --> count next kegel
+    ; yes
+    movf kegelCounter,w ; return value
+    return
