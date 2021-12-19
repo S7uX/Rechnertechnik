@@ -1,0 +1,106 @@
+; /*************** start ***************/
+    device 16f84
+
+pcl equ 2 ; program counter
+fsr equ 4 ; Indirect data memory address pointer 0.
+indf equ 0; Uses contents of FSR to address data memory (not a physical register).
+
+status equ 3
+rp0 equ 5 ; bank select
+carry equ 0 ; carry flag - Indicates when an arithmetic carry or borrow has been generated out of the most significant ALU bit position.
+zero equ 2 ; zero flag - Indicates that the result of an operation was zero.
+
+porta equ 5
+ra0 equ 0 ; RA0
+portb equ 6
+
+; vars
+var equ 10h
+
+    org 0
+
+cold
+    bsf status,rp0 ; select bank 1
+    ; port initalization 
+    bcf status,rp0 ; select bank 0
+mainloop
+; /*************** start ***************/
+
+
+; /*************** loop ***************/
+movlw 4
+movwf foo
+loop ; foo - 1 iterations
+    ; body
+    decfsz foo ; decrement f, skip if 0
+    goto loop ; not null
+; /*************** loop ***************/
+
+
+; /*************** equals ***************/
+movf var1,w
+xorwf var2,w
+btfsc status,zero
+goto equal
+goto not_equal
+; /*************** equals ***************/
+
+
+; /*************** number comparison ***************/
+movf foo,w
+subwf bar,w ; difference 
+btfsc status,zero ; equal?
+goto equal ; yes
+; no
+btfsc status,carry; (2 complement)
+goto fooSmaller ; C = 1 --> foo < bar
+goto fooGreater ; C = 0 --> foo > bar  
+; /*************** number comparison ***************/
+
+
+
+
+
+; /*************** indirect ***************/
+movlw 12h ; adress
+movwf fsr
+movf indf ; get value in 12h
+incf indf
+; /*************** indirect ***************/
+
+
+; /*************** software wait ***************/
+; 1 ms = 1000 µs; 1 basic command = 1 µs; commands with jump = 2 µs
+; initalization
+    movlw 101 ; 1 µs; number of deplay iterations 
+    movwf deplayCounter ; 1 µs
+wait ; 1 Iteration 3µs - 100 iterations 
+    decfsz deplayCounter ; 1 µs
+    goto wait ; 2 µs 
+    ; time = 2 µs + 100 * 3 µs = 302 µs  
+; /*************** software wait ***************/
+
+
+; /*************** check edge ***************/
+checkEdge
+    ; read current value
+    movf porta,w
+    andlw mask ; mask clock signal on RA0
+    movwf currentValue
+    xorwf oldValue,w ; compare with oldValue
+    movwf edge
+
+    ; oldValue := currentValue
+    movf currentValue,w
+    movwf oldValue
+
+    ; edge = 0 if currentValue = oldValue
+    movf edge ; set zero-flag if edge = 0
+    btfsc status,zero ; edge 0?
+    retlw 0 ; no --> no new edge
+ 
+    movf currentValue ; set zero-flag if currentValue = 0
+    btfss status,zero ; currentValue = 0? or zero = 1? 
+    retlw 2 ; no --> rising edge
+    retlw 1 ; yes --> falling edge
+; /*************** check edge ***************/

@@ -1,5 +1,5 @@
 %Document
-\documentclass[10pt,a4paper]{article} 
+\documentclass[10pt,a4paper]{scrartcl} 
 \begin{filecontents*}[overwrite]{\jobname.xmpdata}
     \Title{Systemnahes Programmieren Listings}
     \Author{Valerio Cocco}
@@ -43,6 +43,7 @@
 
 \definecolor{LightGray}{HTML}{f7f7f7}
 
+
 \newtcbinputlisting{assembler}[1]{%
     listing engine=minted,
     % listing engine=listings,
@@ -85,9 +86,19 @@
 \renewcommand\theFancyVerbLine{\tiny\arabic{FancyVerbLine}} % minted
 
 \begin{document} 
-	\assembler{../bcd-zaehler_aufg_1a/bcd_counter.src}
-	\assembler{../bcd_siebensegmentanzeige_aufg_2/bcd_seven_segment_display.src}
-	\assembler{../frequenzteiler_aufg_3/frequency_divider.src}
+    \subsubsection*{Schnipsel}
+	\assembler{../schnipsel.src}\clearpage
+    \subsubsection*{BCD-Zähler}
+	\assembler{../bcd-zaehler_aufg_1a/bcd_counter.src}\clearpage
+    \subsubsection*{BCD Siebensegment}
+	\assembler{../bcd_siebensegmentanzeige_aufg_2/bcd_seven_segment_display.src}\clearpage
+    \subsubsection*{Frequenzteiler}
+	\assembler{../frequenzteiler_aufg_3/frequency_divider.src}\clearpage
+    \subsubsection*{KM Zähler}
 	\assembler{../km_zaehler_aufg_8/km_counter.src}
+    \subsubsection*{Impuls Verlängerer}
+    \assembler{../klausur_vorbereitung/impuls_verlaengerer/puls_extender.src}
+    \subsubsection*{Lauflicht}
+    \assembler{../klausur_vorbereitung/lauflicht/lauflicht.src}
 \end{document}
 

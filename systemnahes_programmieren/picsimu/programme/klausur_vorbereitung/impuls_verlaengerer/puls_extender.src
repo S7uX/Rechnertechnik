@@ -1,0 +1,63 @@
+    device 16f84
+
+; \***************** labels **********************\
+status equ 3
+rp0 equ 5
+
+porta equ 5
+sigIn equ 0 ; RA0
+sigOut equ 1 ; RA1
+
+; vars
+msCounter equ 10h
+
+; \***************** labels **********************\
+
+    org 0
+
+cold
+    bsf status,rp0 ; bank 1
+    bcf prota,sigOut
+    bcf status,rp0 ; bank 0
+
+    goto mainloop
+
+makeOut
+    ; check if ms Counter between 2 & 6 
+    infc msCounter ; 1 µs
+    decfsz msCounter
+    goto waitOutInit
+    goto mainloop ; decfsz = 0
+
+waitOutInit
+    bcs prota,sigOut ; 1µs
+    movlw 100 ; 1 µs; number of deplay iterations 
+    movwf deplayCounter ; 1 µs
+waitOut ; iteration = 5 µs
+    decfsz deplayCounter ; 1 µs (2 µs)
+    goto waitOut ; 2 µs
+    nop ; 1 µs
+    nop ; 1 µs
+    goto makeOut ; 2 µs
+
+mainloop
+    bcf prota,sigOut ; sigOut = 0
+    btfss porta,0 ; high sig? / 2 µs
+    goto mainloop ; no
+count
+    movlw 31 ; 1 µs; number of deplay iterations 
+    movwf deplayCounter ; 1 µs
+wait ; iteration = 3 µs
+    decfsz deplayCounter ; 1 µs (2 µs)
+    goto wait ; 2 µs
+    
+    ; 100 µs
+
+    btfss porta,0 ; still high?
+    goto makeOut ; no
+
+    infc msCounter
+    goto count
+
+
+

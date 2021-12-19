@@ -1,0 +1,27 @@
+status equ 3
+rp0 equ 5
+carry equ 0
+zero equ 2
+pcl equ 2
+
+porta equ 5
+portb equ 6
+trisa equ 5
+trisb equ 6
+
+cold
+    bsf status,rp0 ;Auf Bank1 umschalten
+    bsf trisa,0 ;RA0 auf Eingang setzen
+    clrf trisb ;PortB alles auf Ausgang
+    bcf status,rp0 ;Auf Bank 0 umschalten
+    bsf portb,0 ;Port RB0 auf 1 Setzen
+start
+    btfsc porta,0 ;Wenn signal an Port0 erkannt
+    goto loop ;in den Loop springen, ansonsten bei
+    goto start ;Start weitermachen
+
+loop
+    btfsc status,carry ;Wenn Carry auf 1 
+    rlf portb ;2 mal shiften 
+    rlf portb ;andernfalls nur
+    goto start ;1 mal shiften
