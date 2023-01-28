@@ -1,9 +1,8 @@
 # Rechnertechnik
 
 Das ist mein Git-Projekt für die Vorlesung "Rechnertechnik" an der DHBW-Karlsruhe, beim Dozenten **Stefan Lehmann**.
-7Es diente hautpsächlich der Verwaltung von dem Assembler-Codes.
 
-Das Projekt enthält Aufgaben und selbstgeschriebenen Code und Dokumentation.
+Das Projekt enthält Übungsaufgaben und selbstgeschriebenen Code und Dokumentation.
 Unter dem Pfad ```/Rechnertechnik/systemnahes_programmieren/picsimu/programme/``` findet man mein Assembler-Code.
 
 
