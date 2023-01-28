@@ -11,4 +11,3 @@ Unter dem Pfad ```/Rechnertechnik/systemnahes_programmieren/picsimu/programme/``
 
 ![assembler_listing.png](images%2Fassembler_listing.png)
 
-
